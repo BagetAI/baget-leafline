@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --leafline-linen: #FAF6F1;
+  --leafline-terracotta: #C4654A;
+  --leafline-sage: #7D8B69;
+  --leafline-brown: #3D2B1F;
+}
+
+body {
+  color: var(--leafline-brown);
+  background: var(--leafline-linen);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-heading), serif;
+}
+
+.organic-blob {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+}
+
+.warm-shadow {
+  box-shadow: 0 12px 32px rgba(196,101,74,0.08);
+}
+
+input:focus {
+  outline: 2px solid var(--leafline-sage);
+}
