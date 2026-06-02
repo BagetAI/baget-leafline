@@ -1,1 +1,14 @@
-// Framework files removed for static deployment
+{
+  "name": "baget-leafline",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tailwind -i app/globals.css -o public/globals.css"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.18"
+  }
+}

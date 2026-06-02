@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2 } from "lucide-react";
+import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LandingPage() {
@@ -60,10 +60,10 @@ export default function LandingPage() {
           <span className="text-2xl font-heading tracking-tight">LeafLine</span>
         </div>
         <a 
-          href="#waitlist" 
+          href="#verify-intent" 
           className="bg-sage text-linen px-6 py-3 rounded-3xl font-semibold hover:bg-[#6c7a59] transition-colors"
         >
-          Join Waitlist
+          Skip Waitlist ($1)
         </a>
       </nav>
 
@@ -85,10 +85,10 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <a 
-              href="#waitlist" 
+              href="#verify-intent" 
               className="bg-terracotta text-linen px-8 py-4 rounded-3xl text-lg font-bold flex items-center justify-center gap-2 warm-shadow hover:scale-[1.02] transition-transform"
             >
-              Reserve Your Spot <ChevronRight size={20} />
+              Skip Waitlist ($1) <ChevronRight size={20} />
             </a>
             {signupCount !== null && (
               <div className="flex items-center gap-2 px-6 py-4 text-brown/60 italic">
@@ -112,6 +112,71 @@ export default function LandingPage() {
             className="rounded-3xl warm-shadow w-full object-cover aspect-[4/3]"
           />
         </motion.div>
+      </section>
+
+      {/* Validation / Intent Section */}
+      <section id="verify-intent" className="py-16 px-6 max-w-4xl mx-auto text-center">
+        <div className="bg-[#f1f4ee] border border-sage/20 p-8 md:p-12 rounded-3xl warm-shadow">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-sage text-white rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+            <Sparkles size={12} /> Priority Queue Validation
+          </div>
+          <h2 className="text-3xl md:text-4xl font-heading mb-4 text-brown">Accelerate Your Local Pod</h2>
+          <p className="text-lg text-brown/80 mb-8 max-w-2xl mx-auto">
+            We launch 5-mile local pods once we verify 50 high-intent neighborhood gardeners in a single zip code. Skip the standard queue and show your commitment with a fully-refundable $1 deposit.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 text-left mb-8">
+            <div className="bg-white p-6 rounded-2xl border border-sage/10 flex flex-col justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-sage mb-2">Free Waitlist</h3>
+                <p className="text-sm text-brown/70 mb-4">
+                  Standard neighborhood queue based strictly on generic sign-up speed.
+                </p>
+                <ul className="text-xs space-y-2 mb-6 text-brown/60">
+                  <li className="flex items-center gap-2">• Standard placement in list</li>
+                  <li class="flex items-center gap-2">• Regular activation queue updates</li>
+                  <li class="flex items-center gap-2">• Access to standard swap directory</li>
+                </ul>
+              </div>
+              <a 
+                href="#waitlist" 
+                className="block text-center border border-sage text-sage py-3 rounded-xl font-bold text-sm hover:bg-sage/10 transition-colors"
+              >
+                Join Standard Queue
+              </a>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border-2 border-terracotta relative flex flex-col justify-between warm-shadow">
+              <span className="absolute -top-3 right-4 bg-terracotta text-linen text-[10px] uppercase font-bold px-2 py-0.5 rounded-full">
+                Priority Launch Weight
+              </span>
+              <div>
+                <h3 className="text-xl font-bold text-brown mb-2">Founding Member Reserve</h3>
+                <p className="text-sm text-brown/70 mb-4">
+                  Secure first-tier activation priority and get immediate platform perks.
+                </p>
+                <ul className="text-xs space-y-2 mb-6 text-brown/60">
+                  <li className="flex items-center gap-2">• Maximum weighting for zip code launch</li>
+                  <li className="flex items-center gap-2">• Verified "Founding Gardener" badge</li>
+                  <li className="flex items-center gap-2">• Digital kit of LeafLine printable labels</li>
+                </ul>
+              </div>
+              <a 
+                href="https://app.baget.ai/api/platform/v1/pay/ed75e0c8-37ee-47af-a711-670ac6101999" 
+                className="block text-center bg-terracotta text-linen py-3 rounded-xl font-bold text-sm hover:bg-[#b05a41] transition-colors warm-shadow"
+              >
+                Skip Waitlist ($1.00)
+              </a>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-2 justify-center max-w-xl mx-auto text-left text-xs text-brown/60">
+            <AlertCircle size={16} className="text-terracotta shrink-0 mt-0.5" />
+            <p>
+              100% of deposits directly fund physical printable label supplies for launch captains. Fully refundable if your local 5-mile pod fails to activate before December 31, 2026. Secured via Baget.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Features */}
@@ -175,7 +240,7 @@ export default function LandingPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     placeholder="Jane Doe"
-                    className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage"
+                    className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage text-brown"
                   />
                 </div>
                 <div>
@@ -186,7 +251,7 @@ export default function LandingPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     placeholder="jane@example.com"
-                    className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage"
+                    className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage text-brown"
                   />
                 </div>
               </div>
@@ -198,7 +263,7 @@ export default function LandingPage() {
                   value={formData.neighborhood}
                   onChange={(e) => setFormData({...formData, neighborhood: e.target.value})}
                   placeholder="Silver Lake / 90026"
-                  className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage"
+                  className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage text-brown"
                 />
               </div>
               <div>
@@ -209,7 +274,7 @@ export default function LandingPage() {
                   value={formData.favorite_plant}
                   onChange={(e) => setFormData({...formData, favorite_plant: e.target.value})}
                   placeholder="Monstera deliciosa"
-                  className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage"
+                  className="w-full p-4 rounded-2xl bg-linen border-none focus:ring-2 focus:ring-sage text-brown"
                 />
               </div>
               
