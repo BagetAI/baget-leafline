@@ -1,8 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle, Award, Check } from "lucide-react";
+import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle, Award, Check, Search, Filter } from "lucide-react";
 import { motion } from "framer-motion";
+
+interface PlantListing {
+  id: string;
+  plant_name: string;
+  variety: string;
+  neighborhood: string;
+  status: string;
+  owner_email: string;
+  image_url: string | null;
+  cutting_size: string;
+  credit_value: number;
+  health_status: string;
+  created_at: string;
+}
 
 export default function LandingPage() {
   const [formData, setFormData] = useState({
@@ -13,17 +27,47 @@ export default function LandingPage() {
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [signupCount, setSignupCount] = useState<number | null>(null);
+  
+  // Real-time Inventory State
+  const [listings, setListings] = useState<PlantListing[]>([]);
+  const [loadingListings, setLoadingListings] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState("all");
 
   const DATABASE_ID = "bdd20dba-d6c6-4362-a9d2-e49e2921613c";
   const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/22059e1a-48ed-4d7e-a60f-857b02836594";
   const FOUNDING_MEMBER_URL = "https://app.baget.ai/api/platform/v1/pay/7f7920ae-05dc-4661-b010-4564a6dc878c";
 
+  // Load waitlist signup count
   useEffect(() => {
     fetch(`https://app.baget.ai/api/public/databases/${DATABASE_ID}/count`)
       .then(res => res.json())
       .then(data => setSignupCount(data.count))
       .catch(() => {});
   }, []);
+
+  // Load real-time listings with filtering
+  useEffect(() => {
+    setLoadingListings(true);
+    let url = "/api/plants/search";
+    const params = new URLSearchParams();
+    if (searchQuery) params.append("query", searchQuery);
+    if (selectedNeighborhood !== "all") params.append("neighborhood", selectedNeighborhood);
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setListings(data.listings);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingListings(false));
+  }, [searchQuery, selectedNeighborhood]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +110,12 @@ export default function LandingPage() {
             className="hidden sm:inline-block text-sm font-semibold hover:text-[#C4654A] transition-colors text-[#3D2B1F]"
           >
             Club Membership
+          </a>
+          <a 
+            href="#inventory" 
+            className="hidden sm:inline-block text-sm font-semibold hover:text-[#C4654A] transition-colors text-[#3D2B1F]"
+          >
+            Live Inventory
           </a>
           <a 
             href={SUBSCRIPTION_URL} 
@@ -123,8 +173,114 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      {/* Real-time Inventory Section */}
+      <section id="inventory" className="py-20 px-6 bg-[#F5EFE6] border-y border-[#7D8B69]/10">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#C4654A]/10 text-[#C4654A] rounded-full text-xs font-bold uppercase tracking-widest mb-4">
+              <Sparkles size={12} /> Live catalog
+            </div>
+            <h2 className="text-3xl md:text-5xl font-heading text-[#3D2B1F] mb-4">Active Pod Inventory</h2>
+            <p className="text-lg text-[#3D2B1F]/70 max-w-2xl mx-auto">
+              Real cuttings and mother plants currently registered in our active target pods. Inspect the ledger below.
+            </p>
+          </div>
+
+          {/* Catalog Controls */}
+          <div className="bg-white p-4 rounded-2xl warm-shadow border border-[#7D8B69]/10 mb-8 max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full md:w-2/3">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#3D2B1F]/40" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search plants (e.g. Alocasia, Esqueleto, Pothos)..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 bg-[#FAF6F1] border-none rounded-xl focus:ring-2 focus:ring-[#7D8B69] text-[#3D2B1F] placeholder-[#3D2B1F]/40"
+              />
+            </div>
+            <div className="w-full md:w-1/3 flex items-center gap-2">
+              <Filter className="text-[#3D2B1F]/50 shrink-0" size={18} />
+              <select 
+                value={selectedNeighborhood}
+                onChange={(e) => setSelectedNeighborhood(e.target.value)}
+                className="w-full p-3 bg-[#FAF6F1] border-none rounded-xl text-[#3D2B1F] font-semibold"
+              >
+                <option value="all">All Neighborhoods</option>
+                <option value="Silver Lake">Silver Lake (90026)</option>
+                <option value="Park Slope">Park Slope (11215)</option>
+                <option value="East Austin">East Austin (78702)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Listings Grid */}
+          {loadingListings ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-3 text-[#3D2B1F]/50">
+              <Loader2 className="animate-spin text-[#C4654A]" size={40} />
+              <p className="font-semibold">Loading hyper-local catalog...</p>
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-[#7D8B69]/20 max-w-lg mx-auto">
+              <AlertCircle className="mx-auto text-[#C4654A] mb-4" size={40} />
+              <h3 className="text-xl font-heading mb-2">No listings found</h3>
+              <p className="text-sm text-[#3D2B1F]/70">No plants matched your criteria. Join the waitlist below to submit your collection and start swapping!</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {listings.map((item) => (
+                <div 
+                  key={item.id}
+                  className="bg-white rounded-3xl overflow-hidden border border-[#7D8B69]/10 warm-shadow hover:scale-[1.01] transition-all flex flex-col justify-between"
+                >
+                  <div className="relative">
+                    {item.image_url ? (
+                      <img 
+                        src={item.image_url} 
+                        alt={item.plant_name}
+                        className="w-full h-56 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-56 bg-[#FAF6F1] flex items-center justify-center text-[#7D8B69]">
+                        <Leaf size={48} className="opacity-30" />
+                      </div>
+                    )}
+                    <span className="absolute top-4 right-4 bg-[#7D8B69] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1">
+                      <ShieldCheck size={12} /> {item.health_status}
+                    </span>
+                    <span className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm text-[#3D2B1F] text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm">
+                      <MapPin size={12} className="text-[#C4654A]" /> {item.neighborhood.split(" / ")[0]}
+                    </span>
+                  </div>
+
+                  <div className="p-6">
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                      <h3 className="text-xl font-heading text-[#3D2B1F] font-bold truncate">{item.plant_name}</h3>
+                      <div className="bg-[#C4654A]/10 text-[#C4654A] text-xs font-bold px-2.5 py-1 rounded-lg shrink-0">
+                        {item.credit_value} {item.credit_value === 1 ? "Credit" : "Credits"}
+                      </div>
+                    </div>
+                    <p className="text-xs text-[#3D2B1F]/50 uppercase font-bold mb-4 tracking-wider">{item.variety}</p>
+                    
+                    <div className="border-t border-[#7D8B69]/10 pt-4 flex items-center justify-between text-xs text-[#3D2B1F]/70">
+                      <div>
+                        <span className="block text-[#3D2B1F]/40 font-bold uppercase text-[9px] tracking-wider">Cutting Size</span>
+                        <span className="font-semibold">{item.cutting_size}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="block text-[#3D2B1F]/40 font-bold uppercase text-[9px] tracking-wider">Owner status</span>
+                        <span className="font-semibold text-[#7D8B69]">Verified Member</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* Pricing / Membership Section */}
-      <section id="membership" className="py-16 px-6 max-w-7xl mx-auto">
+      <section id="membership" className="py-20 px-6 max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#7D8B69]/10 text-[#7D8B69] rounded-full text-xs font-bold uppercase tracking-widest mb-4">
             <Sparkles size={12} /> Flexible On-Ramps
