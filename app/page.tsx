@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle, Heart } from "lucide-react";
+import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LandingPage() {
@@ -15,7 +15,7 @@ export default function LandingPage() {
   const [signupCount, setSignupCount] = useState<number | null>(null);
 
   const DATABASE_ID = "bdd20dba-d6c6-4362-a9d2-e49e2921613c";
-  const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/61bc91c3-78ee-45d3-bc1a-8bba4944ca4f";
+  const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/e3b3d3f4-9f93-4ecf-bcb4-0a94665cde93";
   const PRIORITY_PASS_URL = "https://app.baget.ai/api/platform/v1/pay/bcab44c7-4603-4e51-b0cc-99eb9939a922";
 
   useEffect(() => {
@@ -174,7 +174,7 @@ export default function LandingPage() {
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-2xl font-heading text-[#3D2B1F]">Monthly Swapper</h3>
                 <span className="bg-[#7D8B69]/10 text-[#7D8B69] text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                  <Heart size={12} className="fill-[#7D8B69]" /> Unlimited
+                  Unlimited
                 </span>
               </div>
               <p className="text-sm text-[#3D2B1F]/70 mb-6">
