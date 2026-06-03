@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle } from "lucide-react";
+import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle, Award } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LandingPage() {
@@ -16,7 +16,7 @@ export default function LandingPage() {
 
   const DATABASE_ID = "bdd20dba-d6c6-4362-a9d2-e49e2921613c";
   const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/e3b3d3f4-9f93-4ecf-bcb4-0a94665cde93";
-  const PRIORITY_PASS_URL = "https://app.baget.ai/api/platform/v1/pay/bcab44c7-4603-4e51-b0cc-99eb9939a922";
+  const FOUNDING_MEMBER_URL = "https://app.baget.ai/api/platform/v1/pay/7f7920ae-05dc-4661-b010-4564a6dc878c";
 
   useEffect(() => {
     fetch(`https://app.baget.ai/api/public/databases/${DATABASE_ID}/count`)
@@ -39,7 +39,6 @@ export default function LandingPage() {
       if (response.ok) {
         setStatus("success");
         setFormData({ name: "", email: "", neighborhood: "", favorite_plant: "" });
-        // Refresh count
         fetch(`https://app.baget.ai/api/public/databases/${DATABASE_ID}/count`)
           .then(res => res.json())
           .then(data => setSignupCount(data.count));
@@ -69,10 +68,10 @@ export default function LandingPage() {
             Club Membership
           </a>
           <a 
-            href={SUBSCRIPTION_URL} 
+            href={FOUNDING_MEMBER_URL} 
             className="bg-[#7D8B69] text-[#FAF6F1] px-6 py-3 rounded-3xl text-sm font-semibold hover:bg-[#6c7a59] transition-colors shadow-sm"
           >
-            Subscribe ($1/mo)
+            Founding Member ($5)
           </a>
         </div>
       </nav>
@@ -91,14 +90,14 @@ export default function LandingPage() {
             Trade cuttings with neighbors you <span className="text-[#C4654A] italic text-6xl md:text-8xl">actually</span> trust.
           </h1>
           <p className="text-xl md:text-2xl text-[#3D2B1F]/80 mb-10 leading-relaxed max-w-xl">
-            LeafLine is the neighborhood ledger for better plants. Swap safely with a local $1/month club membership or join our standard queue.
+            LeafLine is the neighborhood ledger for better plants. Swap safely with a local club membership or secure lifetime Founding Member status.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <a 
-              href={SUBSCRIPTION_URL} 
+              href={FOUNDING_MEMBER_URL} 
               className="bg-[#C4654A] text-[#FAF6F1] px-8 py-4 rounded-3xl text-lg font-bold flex items-center justify-center gap-2 warm-shadow hover:scale-[1.02] transition-transform"
             >
-              Get Club Access ($1/mo) <ChevronRight size={20} />
+              Become a Founding Member ($5) <ChevronRight size={20} />
             </a>
             {signupCount !== null && (
               <div className="flex items-center gap-2 px-6 py-4 text-[#3D2B1F]/60 italic">
@@ -132,7 +131,7 @@ export default function LandingPage() {
           </div>
           <h2 className="text-3xl md:text-5xl font-heading text-[#3D2B1F] mb-4">Choose Your Swap Experience</h2>
           <p className="text-lg text-[#3D2B1F]/70 max-w-2xl mx-auto">
-            Support your local neighborhood pod. Get standard queue placement or subscribe to unlock active, pest-free club exchanges.
+            Support your local neighborhood pod. Get standard queue placement, subscribe to monthly swaps, or secure permanent Founding status.
           </p>
         </div>
 
@@ -165,76 +164,78 @@ export default function LandingPage() {
             </a>
           </div>
 
-          {/* Card 2: Subscription Tier (Primary) */}
-          <div className="bg-white p-8 rounded-3xl border-2 border-[#C4654A] relative flex flex-col justify-between hover:scale-[1.01] transition-all warm-shadow">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C4654A] text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-wider">
-              Most Popular
-            </span>
+          {/* Card 2: Subscription Tier */}
+          <div className="bg-white p-8 rounded-3xl border border-[#7D8B69]/10 flex flex-col justify-between hover:border-[#7D8B69]/30 transition-all warm-shadow">
             <div>
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-2xl font-heading text-[#3D2B1F]">Monthly Swapper</h3>
-                <span className="bg-[#7D8B69]/10 text-[#7D8B69] text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
-                  Unlimited
-                </span>
               </div>
               <p className="text-sm text-[#3D2B1F]/70 mb-6">
                 Our core membership. Unlock full trading powers, reliability score, and AI Health Check.
               </p>
               <div className="flex items-baseline gap-1 mb-6">
-                <span className="text-4xl font-heading text-[#3D2B1F] font-bold">$1.00</span>
+                <span className="text-3xl font-heading text-[#3D2B1F] font-bold">$1.00</span>
                 <span className="text-[#3D2B1F]/60 text-sm">/ month</span>
               </div>
               <ul className="text-sm space-y-3 mb-8 text-[#3D2B1F]/80">
                 <li className="flex items-center gap-2">
-                  <span className="text-[#C4654A] font-bold">•</span> Unlimited localized swap trades
+                  <span className="text-[#7D8B69] font-bold">•</span> Unlimited localized swap trades
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#C4654A] font-bold">•</span> Full AI Health Passport screenings
+                  <span className="text-[#7D8B69] font-bold">•</span> Full AI Health Passport screenings
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#C4654A] font-bold">•</span> Guaranteed swap-credit escrow protection
+                  <span className="text-[#7D8B69] font-bold">•</span> Guaranteed swap-credit escrow protection
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#C4654A] font-bold">•</span> Access premium & collector level exchanges
+                  <span className="text-[#7D8B69] font-bold">•</span> Access premium & collector level exchanges
                 </li>
               </ul>
             </div>
             <a 
               href={SUBSCRIPTION_URL} 
-              className="block text-center bg-[#C4654A] text-[#FAF6F1] py-3.5 rounded-2xl font-bold text-sm hover:bg-[#b05a41] transition-colors warm-shadow"
+              className="block text-center border-2 border-[#7D8B69] text-[#7D8B69] py-3.5 rounded-2xl font-bold text-sm hover:bg-[#7D8B69]/5 transition-colors"
             >
               Subscribe for $1.00/mo
             </a>
           </div>
 
-          {/* Card 3: One-Time Priority Pass */}
-          <div className="bg-white p-8 rounded-3xl border border-[#7D8B69]/10 flex flex-col justify-between hover:border-[#7D8B69]/30 transition-all warm-shadow">
+          {/* Card 3: One-Time Founding Member Pass */}
+          <div className="bg-white p-8 rounded-3xl border-2 border-[#C4654A] relative flex flex-col justify-between hover:scale-[1.01] transition-all warm-shadow">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C4654A] text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full tracking-wider">
+              Best Value
+            </span>
             <div>
-              <h3 className="text-2xl font-heading text-[#3D2B1F] mb-2">Priority Launch Pass</h3>
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-2xl font-heading text-[#3D2B1F]">Founding Member</h3>
+                <span className="bg-[#C4654A]/10 text-[#C4654A] text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                  <Award size={12} /> Lifetime
+                </span>
+              </div>
               <p className="text-sm text-[#3D2B1F]/70 mb-6">
-                A single contribution that adds massive weighting to help launch your local 5-mile boundary.
+                Support local neighborhood launches. Lock in lifetime premium benefits and complete status.
               </p>
-              <div className="text-3xl font-heading text-[#3D2B1F] mb-6">$1.00 <span className="text-xs font-sans text-[#3D2B1F]/50">one-time</span></div>
+              <div className="text-3xl font-heading text-[#3D2B1F] mb-6">$5.00 <span className="text-xs font-sans text-[#3D2B1F]/50">one-time</span></div>
               <ul className="text-sm space-y-3 mb-8 text-[#3D2B1F]/80">
                 <li className="flex items-center gap-2">
-                  <span className="text-[#7D8B69] font-bold">•</span> Lifetime "Founding Gardener" badge
+                  <span className="text-[#C4654A] font-bold">•</span> Lifetime "Founding Gardener" badge
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#7D8B69] font-bold">•</span> Direct support to local Captain print budget
+                  <span className="text-[#C4654A] font-bold">•</span> 3 free LeafPack swap credits upon launch
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#7D8B69] font-bold">•</span> High-priority launch queue weighting
+                  <span className="text-[#C4654A] font-bold">•</span> Guarantee priority launch weight for your zip
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="text-[#7D8B69] font-bold">•</span> Digital kit of LeafLine printable labels
+                  <span className="text-[#C4654A] font-bold">•</span> Complete printable label and signage kit
                 </li>
               </ul>
             </div>
             <a 
-              href={PRIORITY_PASS_URL} 
-              className="block text-center border-2 border-[#3D2B1F] text-[#3D2B1F] py-3.5 rounded-2xl font-bold text-sm hover:bg-[#3D2B1F]/5 transition-colors"
+              href={FOUNDING_MEMBER_URL} 
+              className="block text-center bg-[#C4654A] text-[#FAF6F1] py-3.5 rounded-2xl font-bold text-sm hover:bg-[#b05a41] transition-colors warm-shadow"
             >
-              Get Priority Pass ($1.00)
+              Get Founding Pass ($5)
             </a>
           </div>
         </div>
@@ -242,7 +243,7 @@ export default function LandingPage() {
         <div className="flex items-start gap-2 justify-center max-w-xl mx-auto text-left text-xs text-[#3D2B1F]/60">
           <AlertCircle size={16} className="text-[#C4654A] shrink-0 mt-0.5" />
           <p>
-            Memberships directly fund local pod propagation tools, labels, and Captain safety packages. Your local pod requires active community nodes to schedule group meetups. Cancel anytime. Secured via Baget.
+            Memberships and Founding Pass purchases directly fund local pod propagation tools, labels, and Captain safety packages. Your local pod requires active community nodes to schedule group meetups. Secured via Baget.
           </p>
         </div>
       </section>
@@ -295,7 +296,13 @@ export default function LandingPage() {
                 <Leaf size={40} className="text-[#FAF6F1]" />
               </div>
               <h3 className="text-3xl font-heading mb-2 text-[#3D2B1F]">You're on the list!</h3>
-              <p className="text-[#3D2B1F]/70">Check your inbox. We'll reach out when your neighborhood pod is ready to sprout.</p>
+              <p className="text-[#3D2B1F]/70 mb-6">Your local spot is recorded. To guarantee immediate launch weight in your zip code, consider upgrading to our Founding Pass.</p>
+              <a 
+                href={FOUNDING_MEMBER_URL}
+                className="inline-block bg-[#C4654A] text-white px-8 py-4 rounded-3xl font-bold hover:bg-[#b05a41] transition-colors warm-shadow text-base"
+              >
+                Upgrade to Founding Pass ($5)
+              </a>
             </motion.div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 text-left">
