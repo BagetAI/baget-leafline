@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle, Award, Check, Search, Filter } from "lucide-react";
-import { motion } from "framer-motion";
+import { Leaf, ShieldCheck, MapPin, Star, ChevronRight, Loader2, Sparkles, AlertCircle, Award, Check, Search, Filter, PlusCircle, Upload, Eye, Mail, Info } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PlantListing {
   id: string;
@@ -17,6 +17,58 @@ interface PlantListing {
   health_status: string;
   created_at: string;
 }
+
+// Preset plants with high-fidelity images for smooth UX cataloging
+const PRESET_PLANTS = [
+  {
+    name: "Monstera Esqueleto",
+    variety: "Deep Fenestrations",
+    imageUrl: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Rooted Cutting"
+  },
+  {
+    name: "Alocasia Silver Dragon (Variegated)",
+    variety: "Mint Variegated",
+    imageUrl: "https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Rooted Cutting"
+  },
+  {
+    name: "Philodendron Spiritus Sancti",
+    variety: "Long Narrow Foliage",
+    imageUrl: "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Mature Plant"
+  },
+  {
+    name: "Variegated Monstera Albo",
+    variety: "Half-Moon Sectoral",
+    imageUrl: "https://images.unsplash.com/photo-1612360424412-dc20392fec2f?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Rooted Cutting"
+  },
+  {
+    name: "Alocasia Frydek Variegata",
+    variety: "Velvet White Variegation",
+    imageUrl: "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Rooted Cutting"
+  },
+  {
+    name: "Philodendron Gloriosum",
+    variety: "Pink Margin Velvet",
+    imageUrl: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Rooted Cutting"
+  },
+  {
+    name: "Anthurium Clarinervium",
+    variety: "Glittering Silver Veins",
+    imageUrl: "https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Mature Plant"
+  },
+  {
+    name: "Epipremnum Pinnatum Albo",
+    variety: "Sectoral Climber",
+    imageUrl: "https://images.unsplash.com/photo-1597055181300-e3633a207518?auto=format&fit=crop&q=80&w=600",
+    defaultSize: "Rooted Cutting"
+  }
+];
 
 export default function LandingPage() {
   const [formData, setFormData] = useState({
@@ -34,9 +86,54 @@ export default function LandingPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNeighborhood, setSelectedNeighborhood] = useState("all");
 
+  // Plant Submission State
+  const [submitForm, setSubmitForm] = useState({
+    plant_name: "Monstera Esqueleto",
+    variety: "Deep Fenestrations",
+    neighborhood: "Silver Lake",
+    owner_email: "",
+    cutting_size: "Rooted Cutting",
+    image_url: "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=600",
+    custom_plant_name: "",
+    custom_variety: "",
+    custom_image_url: "",
+  });
+  const [isCustomPlant, setIsCustomPlant] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [submitError, setSubmitError] = useState("");
+  const [calculatedCredits, setCalculatedCredits] = useState(2);
+  const [submittedPlantDetails, setSubmittedPlantDetails] = useState<any>(null);
+
   const DATABASE_ID = "bdd20dba-d6c6-4362-a9d2-e49e2921613c";
   const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/22059e1a-48ed-4d7e-a60f-857b02836594";
   const FOUNDING_MEMBER_URL = "https://app.baget.ai/api/platform/v1/pay/7f7920ae-05dc-4661-b010-4564a6dc878c";
+
+  // Dynamic credit calculation on client side to mirror the backend logic
+  useEffect(() => {
+    const name = isCustomPlant ? submitForm.custom_plant_name : submitForm.plant_name;
+    const variety = isCustomPlant ? submitForm.custom_variety : submitForm.variety;
+    const fullName = `${name} ${variety}`.toLowerCase();
+
+    if (
+      fullName.includes("spiritus sancti") ||
+      fullName.includes("variegated monstera albo") ||
+      fullName.includes("albo") && fullName.includes("monstera") ||
+      fullName.includes("silver dragon") && fullName.includes("variegated")
+    ) {
+      setCalculatedCredits(4);
+    } else if (
+      fullName.includes("esqueleto") ||
+      fullName.includes("clarinervium") ||
+      fullName.includes("obliqua") ||
+      fullName.includes("frydek") ||
+      fullName.includes("anthurium") ||
+      fullName.includes("alocasia")
+    ) {
+      setCalculatedCredits(2);
+    } else {
+      setCalculatedCredits(1);
+    }
+  }, [submitForm.plant_name, submitForm.variety, submitForm.custom_plant_name, submitForm.custom_variety, isCustomPlant]);
 
   // Load waitlist signup count
   useEffect(() => {
@@ -46,8 +143,8 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
-  // Load real-time listings with filtering
-  useEffect(() => {
+  // Fetch plant listings with parameters
+  const fetchListings = () => {
     setLoadingListings(true);
     let url = "/api/plants/search";
     const params = new URLSearchParams();
@@ -67,9 +164,14 @@ export default function LandingPage() {
       })
       .catch(() => {})
       .finally(() => setLoadingListings(false));
+  };
+
+  // Trigger search on query/neighborhood update
+  useEffect(() => {
+    fetchListings();
   }, [searchQuery, selectedNeighborhood]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
 
@@ -94,6 +196,85 @@ export default function LandingPage() {
     }
   };
 
+  // Preset plant selector updates the preset fields instantly
+  const handlePresetChange = (plantName: string) => {
+    const selected = PRESET_PLANTS.find(p => p.name === plantName);
+    if (selected) {
+      setSubmitForm({
+        ...submitForm,
+        plant_name: selected.name,
+        variety: selected.variety,
+        image_url: selected.imageUrl,
+        cutting_size: selected.defaultSize
+      });
+    }
+  };
+
+  const handlePlantSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitStatus("submitting");
+    setSubmitError("");
+
+    const finalPlantName = isCustomPlant ? submitForm.custom_plant_name : submitForm.plant_name;
+    const finalVariety = isCustomPlant ? submitForm.custom_variety : submitForm.variety;
+    const finalImageUrl = isCustomPlant 
+      ? (submitForm.custom_image_url || "https://images.unsplash.com/photo-1545167622-3a6ac756afa4?auto=format&fit=crop&q=80&w=600")
+      : submitForm.image_url;
+
+    if (!finalPlantName) {
+      setSubmitError("Please provide a plant name.");
+      setSubmitStatus("error");
+      return;
+    }
+
+    if (!submitForm.owner_email) {
+      setSubmitError("Your email address is required to track swap ledger ownership.");
+      setSubmitStatus("error");
+      return;
+    }
+
+    const payload = {
+      plant_name: finalPlantName,
+      variety: finalVariety || "Standard",
+      neighborhood: `${submitForm.neighborhood} / 2026`, // structured neighborhood label
+      owner_email: submitForm.owner_email,
+      image_url: finalImageUrl,
+      cutting_size: submitForm.cutting_size,
+    };
+
+    try {
+      const response = await fetch("/api/plants/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setSubmitStatus("success");
+        setSubmittedPlantDetails(result.data);
+        
+        // Refresh catalog to instantly show the new cutting live!
+        fetchListings();
+
+        // Clear custom fields but keep owner email for convenient subsequent entries
+        setSubmitForm({
+          ...submitForm,
+          custom_plant_name: "",
+          custom_variety: "",
+          custom_image_url: "",
+        });
+      } else {
+        setSubmitError(result.error || "Submission failed. Please check the database integration.");
+        setSubmitStatus("error");
+      }
+    } catch (error: any) {
+      setSubmitError(error.message || "A network connection error occurred.");
+      setSubmitStatus("error");
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[#FAF6F1]">
       {/* Navigation */}
@@ -110,6 +291,12 @@ export default function LandingPage() {
             className="hidden sm:inline-block text-sm font-semibold hover:text-[#C4654A] transition-colors text-[#3D2B1F]"
           >
             Club Membership
+          </a>
+          <a 
+            href="#submit-plant" 
+            className="hidden sm:inline-block text-sm font-semibold hover:text-[#C4654A] transition-colors text-[#3D2B1F]"
+          >
+            Submit Cutting
           </a>
           <a 
             href="#inventory" 
@@ -173,6 +360,247 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
+      {/* Plant Submission - Add to Digital Shelf Section */}
+      <section id="submit-plant" className="py-20 px-6 bg-[#FAF6F1]">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-3xl p-8 md:p-12 warm-shadow border border-[#7D8B69]/10">
+            <div className="text-center mb-8">
+              <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#7D8B69]/10 text-[#7D8B69] rounded-full text-xs font-bold uppercase tracking-widest mb-3">
+                <PlusCircle size={14} /> Add to Digital Shelf
+              </span>
+              <h2 className="text-3xl md:text-5xl font-heading text-[#3D2B1F]">Register Your Mother Plant</h2>
+              <p className="text-sm md:text-base text-[#3D2B1F]/70 mt-3 max-w-xl mx-auto">
+                List a specimen you want to propagate. Every cutting gets an automatic LeafPack credit value based on retail rarity and undergoes the AI Health Passport checks.
+              </p>
+            </div>
+
+            {submitStatus === "success" && submittedPlantDetails ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-[#FAF6F1] p-6 md:p-8 rounded-2xl border border-[#7D8B69]/30 text-center"
+              >
+                <div className="w-16 h-16 bg-[#7D8B69] text-white rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Check size={32} />
+                </div>
+                <h3 className="text-2xl font-heading text-[#3D2B1F] mb-2">Listing Successfully Registered!</h3>
+                <p className="text-sm text-[#3D2B1F]/70 mb-6 max-w-md mx-auto">
+                  Your <strong className="text-[#3D2B1F]">{submittedPlantDetails.plant_name}</strong> is now live on the hyper-local ledger for <strong className="text-[#3D2B1F]">{submitForm.neighborhood}</strong>.
+                </p>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-[#7D8B69]/10 max-w-2xl mx-auto text-left mb-8">
+                  <div>
+                    <span className="block text-[10px] text-[#3D2B1F]/50 font-bold uppercase">Estimated Value</span>
+                    <span className="font-heading text-lg text-[#C4654A] font-bold">
+                      {submittedPlantDetails.credit_value} {submittedPlantDetails.credit_value === 1 ? "Credit" : "Credits"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-[#3D2B1F]/50 font-bold uppercase">Health Passport</span>
+                    <span className="text-xs font-bold text-[#7D8B69] uppercase tracking-wider flex items-center gap-1 mt-1">
+                      <ShieldCheck size={12} /> {submittedPlantDetails.health_status}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-[#3D2B1F]/50 font-bold uppercase">Cutting Size</span>
+                    <span className="text-xs font-semibold text-[#3D2B1F]">{submittedPlantDetails.cutting_size}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[10px] text-[#3D2B1F]/50 font-bold uppercase">Pod Pod ID</span>
+                    <span className="text-xs font-mono text-[#3D2B1F]/70">{submittedPlantDetails.neighborhood.split(" / ")[0]}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    onClick={() => setSubmitStatus("idle")}
+                    className="bg-[#7D8B69] text-white px-6 py-3 rounded-2xl font-semibold text-sm hover:bg-[#6c7a59] transition-colors"
+                  >
+                    Register Another Plant
+                  </button>
+                  <a 
+                    href="#inventory"
+                    className="bg-white text-[#3D2B1F] border border-[#3D2B1F]/20 px-6 py-3 rounded-2xl font-semibold text-sm hover:bg-[#3D2B1F]/5 transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Eye size={16} /> View Active Pod Catalog
+                  </a>
+                </div>
+              </motion.div>
+            ) : (
+              <form onSubmit={handlePlantSubmit} className="space-y-6">
+                {/* Taxonomy & Core Identification */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-[#3D2B1F] mb-2">Select Botanical Species</label>
+                    <div className="relative">
+                      {!isCustomPlant ? (
+                        <select 
+                          value={submitForm.plant_name}
+                          onChange={(e) => handlePresetChange(e.target.value)}
+                          className="w-full p-4 rounded-xl bg-[#FAF6F1] border border-[#7D8B69]/10 text-[#3D2B1F] font-semibold focus:ring-2 focus:ring-[#7D8B69] appearance-none"
+                        >
+                          {PRESET_PLANTS.map((plant) => (
+                            <option key={plant.name} value={plant.name}>
+                              {plant.name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input 
+                          type="text"
+                          required
+                          placeholder="e.g. Philodendron Billietiae"
+                          value={submitForm.custom_plant_name}
+                          onChange={(e) => setSubmitForm({...submitForm, custom_plant_name: e.target.value})}
+                          className="w-full p-4 rounded-xl bg-[#FAF6F1] border border-[#7D8B69]/10 text-[#3D2B1F] placeholder-[#3D2B1F]/40 focus:ring-2 focus:ring-[#7D8B69]"
+                        />
+                      )}
+                    </div>
+                    <div className="mt-2 text-right">
+                      <button 
+                        type="button"
+                        onClick={() => setIsCustomPlant(!isCustomPlant)}
+                        className="text-xs font-bold text-[#C4654A] hover:underline"
+                      >
+                        {isCustomPlant ? "Choose from catalog presets" : "Input a custom rare plant"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#3D2B1F] mb-2">Plant Variety or Mutation</label>
+                    <input 
+                      type="text"
+                      placeholder={isCustomPlant ? "e.g. Variegated, Mint, Aurea, Sport" : "Preset variety"}
+                      disabled={!isCustomPlant}
+                      value={isCustomPlant ? submitForm.custom_variety : submitForm.variety}
+                      onChange={(e) => setSubmitForm({...submitForm, custom_variety: e.target.value})}
+                      className="w-full p-4 rounded-xl bg-[#FAF6F1] border border-[#7D8B69]/10 text-[#3D2B1F] disabled:opacity-60 placeholder-[#3D2B1F]/40 focus:ring-2 focus:ring-[#7D8B69]"
+                    />
+                  </div>
+                </div>
+
+                {/* Local coordinates & Owner ID */}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-[#3D2B1F] mb-2">Active Target Pod</label>
+                    <select 
+                      value={submitForm.neighborhood}
+                      onChange={(e) => setSubmitForm({...submitForm, neighborhood: e.target.value})}
+                      className="w-full p-4 rounded-xl bg-[#FAF6F1] border border-[#7D8B69]/10 text-[#3D2B1F] font-semibold focus:ring-2 focus:ring-[#7D8B69]"
+                    >
+                      <option value="Silver Lake">Silver Lake (90026)</option>
+                      <option value="Park Slope">Park Slope (11215)</option>
+                      <option value="East Austin">East Austin (78702)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#3D2B1F] mb-2">Cutting / Specimen Size</label>
+                    <select 
+                      value={submitForm.cutting_size}
+                      onChange={(e) => setSubmitForm({...submitForm, cutting_size: e.target.value})}
+                      className="w-full p-4 rounded-xl bg-[#FAF6F1] border border-[#7D8B69]/10 text-[#3D2B1F] font-semibold focus:ring-2 focus:ring-[#7D8B69]"
+                    >
+                      <option value="Small Node">Small Node (unrooted)</option>
+                      <option value="Rooted Cutting">Rooted Cutting</option>
+                      <option value="Mature Plant">Mature Plant (established)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-[#3D2B1F] mb-2 flex items-center gap-1">
+                      <Mail size={14} className="text-[#3D2B1F]/50" /> Owner Email
+                    </label>
+                    <input 
+                      type="email"
+                      required
+                      placeholder="gardener@example.com"
+                      value={submitForm.owner_email}
+                      onChange={(e) => setSubmitForm({...submitForm, owner_email: e.target.value})}
+                      className="w-full p-4 rounded-xl bg-[#FAF6F1] border border-[#7D8B69]/10 text-[#3D2B1F] placeholder-[#3D2B1F]/40 focus:ring-2 focus:ring-[#7D8B69]"
+                    />
+                  </div>
+                </div>
+
+                {/* Digital Health Passport Photo Upload simulation */}
+                <div className="bg-[#FAF6F1] p-6 rounded-2xl border border-[#7D8B69]/10">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#7D8B69] uppercase tracking-wider mb-2">
+                    <ShieldCheck size={14} /> AI Health Passport Inspection standard
+                  </span>
+                  <p className="text-xs text-[#3D2B1F]/70 mb-4 leading-relaxed">
+                    Upload a high-resolution closeup of the leaf undersides, stem junctions, and node area. This photo is parsed by our automated system to verify pest-free status before Swap Saturday meetups.
+                  </p>
+
+                  <div className="grid md:grid-cols-2 gap-4 items-center">
+                    <div className="border-2 border-dashed border-[#7D8B69]/20 rounded-xl p-6 bg-white text-center hover:border-[#7D8B69]/40 transition-colors">
+                      <Upload className="mx-auto text-[#7D8B69] mb-2" size={24} />
+                      <span className="block text-xs font-bold text-[#3D2B1F]">Photo Upload Target</span>
+                      <span className="block text-[10px] text-[#3D2B1F]/50 mt-1">Accepts JPG, PNG up to 10MB</span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-[#3D2B1F]">Image URL (Simulated/Unsplash)</label>
+                      <input 
+                        type="text"
+                        placeholder="Automatic image assigned based on selection"
+                        value={isCustomPlant ? submitForm.custom_image_url : submitForm.image_url}
+                        onChange={(e) => {
+                          if (isCustomPlant) {
+                            setSubmitForm({...submitForm, custom_image_url: e.target.value});
+                          } else {
+                            setSubmitForm({...submitForm, image_url: e.target.value});
+                          }
+                        }}
+                        className="w-full p-3 rounded-xl bg-white border border-[#7D8B69]/10 text-xs text-[#3D2B1F] focus:ring-2 focus:ring-[#7D8B69]"
+                      />
+                      <span className="block text-[10px] text-[#3D2B1F]/40">For custom plants, you can supply an image URL or let the platform allocate a high-quality preset specimen photo.</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Sunk-Cost Credit Valuation & Submit Banner */}
+                <div className="flex flex-col md:flex-row items-center justify-between p-6 bg-[#C4654A]/5 rounded-2xl border border-[#C4654A]/10 gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-[#C4654A]/10 flex items-center justify-center text-[#C4654A] shrink-0">
+                      <Award size={24} />
+                    </div>
+                    <div>
+                      <span className="block text-[10px] uppercase text-[#3D2B1F]/50 font-bold">Safe Swap Valuation</span>
+                      <span className="text-sm font-bold text-[#3D2B1F] flex items-center gap-1">
+                        Est. <strong className="text-lg text-[#C4654A] font-heading font-bold">{calculatedCredits} {calculatedCredits === 1 ? "Credit" : "Credits"}</strong> inside the ledger
+                      </span>
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={submitStatus === "submitting"}
+                    className="w-full md:w-auto bg-[#C4654A] text-white px-8 py-4 rounded-2xl font-bold text-sm hover:bg-[#b05a41] transition-colors shadow-md flex items-center justify-center gap-2"
+                  >
+                    {submitStatus === "submitting" ? (
+                      <>
+                        <Loader2 className="animate-spin" size={16} /> Vetting and listing...
+                      </>
+                    ) : (
+                      <>
+                        Confirm and Post cutting
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {submitStatus === "error" && (
+                  <div className="p-4 bg-red-50 rounded-xl border border-red-200 text-red-600 text-xs font-semibold flex items-center gap-2">
+                    <AlertCircle size={16} /> {submitError}
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Real-time Inventory Section */}
       <section id="inventory" className="py-20 px-6 bg-[#F5EFE6] border-y border-[#7D8B69]/10">
         <div className="max-w-7xl mx-auto">
@@ -223,7 +651,7 @@ export default function LandingPage() {
             <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-[#7D8B69]/20 max-w-lg mx-auto">
               <AlertCircle className="mx-auto text-[#C4654A] mb-4" size={40} />
               <h3 className="text-xl font-heading mb-2">No listings found</h3>
-              <p className="text-sm text-[#3D2B1F]/70">No plants matched your criteria. Join the waitlist below to submit your collection and start swapping!</p>
+              <p className="text-sm text-[#3D2B1F]/70">No plants matched your criteria. Use the cutting submission form above to register yours!</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -473,7 +901,7 @@ export default function LandingPage() {
               </div>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 text-left">
+            <form onSubmit={handleWaitlistSubmit} className="space-y-4 text-left">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold mb-2 ml-1 text-[#3D2B1F]">Your Name</label>
