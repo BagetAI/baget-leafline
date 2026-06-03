@@ -15,8 +15,8 @@ export default function LandingPage() {
   const [signupCount, setSignupCount] = useState<number | null>(null);
 
   const DATABASE_ID = "bdd20dba-d6c6-4362-a9d2-e49e2921613c";
-  const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/91107e9e-5670-4979-8d38-005f9546e035";
-  const PRIORITY_PASS_URL = "https://app.baget.ai/api/platform/v1/pay/ed75e0c8-37ee-47af-a711-670ac6101999";
+  const SUBSCRIPTION_URL = "https://app.baget.ai/api/platform/v1/pay/8414d6ed-a0d9-4380-bd51-8d9c676bb5fa";
+  const PRIORITY_PASS_URL = "https://app.baget.ai/api/platform/v1/pay/bcab44c7-4603-4e51-b0cc-99eb9939a922";
 
   useEffect(() => {
     fetch(`https://app.baget.ai/api/public/databases/${DATABASE_ID}/count`)
